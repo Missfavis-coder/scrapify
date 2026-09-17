@@ -1,2 +1,7 @@
+packages:
+  - "backend"
+  - "frontend"
+  - "ml"
+
 allowBuilds:
   esbuild: true
