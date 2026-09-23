@@ -1,7 +1,11 @@
-import app from "./app";
+import { env } from "./config/env.js";
+import app from "./app.js";
+import { logger } from "./utils/logger.js";
 
-const PORT = process.env.PORT || 4000;
+const PORT = env.PORT || 4000;
 
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  logger.info(`Server running on port ${PORT}`, {
+    env: env.NODE_ENV,
+  });
 });
