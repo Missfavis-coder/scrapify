@@ -1,0 +1,34 @@
+{
+  "title": "Replay Workflow Automation Engine Input",
+  "type": "object",
+  "schemaVersion": 1,
+  "properties": {
+    "url": {
+      "title": "Target Website URL",
+      "type": "string",
+      "description": "The URL of the website you want to automate (e.g. https://books.toscrape.com)",
+      "editor": "textfield",
+      "default": "https://books.toscrape.com"
+    },
+    "taskDescription": {
+      "title": "Task Description",
+      "type": "string",
+      "description": "Describe in plain English what data to extract or steps to perform.",
+      "editor": "textarea",
+      "default": "Extract books and prices with availability"
+    },
+    "workflowId": {
+      "title": "Saved Workflow ID (Optional - For Fast Replay)",
+      "type": "string",
+      "description": "If provided, skips discovery and replays the saved workflow graph with new parameters.",
+      "editor": "textfield"
+    },
+    "inputValues": {
+      "title": "Input Parameters (Optional)",
+      "type": "object",
+      "description": "Key-value map for runtime parameter substitution (e.g. {\"query\": \"travel\"}).",
+      "editor": "json"
+    }
+  },
+  "required": []
+}

@@ -1,0 +1,12 @@
+{
+  "$schema": "https://apify.com/schemas/v1/actor.ide.json",
+  "actorSpecification": 1,
+  "name": "replay-web-workflow-engine",
+  "title": "Replay — Web Workflow Automation Engine",
+  "description": "Discover, compile, and replay web workflows with zero AI cost on repeat runs.",
+  "version": "1.0",
+  "buildTag": "latest",
+  "meta": {
+    "templateId": "ts-playwright"
+  }
+}
