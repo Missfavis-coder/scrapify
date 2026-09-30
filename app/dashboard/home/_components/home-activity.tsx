@@ -100,7 +100,7 @@ function ActivityIcon({
 export default function RecentActivity() {
   return (
     <section className="mt-18 rounded-2xl border border-neutral-200 bg-white">
-      <div className="flex items-center justify-between border-b border-neutral-200 px-5 py-4">
+      <div className="sm:flex block gap-4 items-center justify-between border-b border-neutral-200 px-5 py-4">
         <div>
           <h2 className="text-[15px] font-semibold text-secondary">
             Recent activity
@@ -113,9 +113,10 @@ export default function RecentActivity() {
 
         <button
           type="button"
-          className="text-sm font-medium text-neutral-500 transition-colors hover:text-secondary cursor-pointer"
+          className="text-sm font-medium text-neutral-600 transition-colors hover:text-primary cursor-pointer sm:mt-0 mt-2"
         >
           View all
+
         </button>
       </div>
 
@@ -138,7 +139,7 @@ export default function RecentActivity() {
                 </p>
               </div>
 
-              <div className="flex shrink-0 items-center gap-1.5 text-xs text-primary">
+              <div className="flex shrink-0 items-center gap-1 text-xs text-primary">
                 <Clock3 className="size-3.5" />
                 <span>{activity.time}</span>
               </div>
