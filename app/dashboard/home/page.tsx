@@ -54,6 +54,7 @@ import type { GenerationMode } from "@/lib/types/generation";
 import UrlInput from "./_components/url-input";
 import RecentActivity from "./_components/home-activity";
 import { DEFAULT_MODE, MODES } from "@/lib/constants/modes";
+import { useCreateAutomation } from "@/lib/hooks/use-automation";
 
 const FormSchema = z.object({
   url: z.string().min(4).refine(isValidUrl, "Enter a valid URL"),
@@ -73,7 +74,7 @@ const replaySteps = [
 
 
 export default function HomePage() {
-  const router = useRouter();
+
 
   const [url, setUrl] = useState("");
   const [description, setDescription] = useState("");
@@ -81,7 +82,9 @@ export default function HomePage() {
   const [mode, setMode] =
     useState<GenerationMode>(DEFAULT_MODE);
 
-  const [isNavigating, setIsNavigating] = useState(false);
+    const router = useRouter();
+    const createAutomation = useCreateAutomation();
+    const isPending = createAutomation.isPending;
   const [detectionReason, setDetectionReason] =
     useState<string | null>(null);
 
@@ -180,46 +183,37 @@ export default function HomePage() {
   }, []);
 
 
-  const handleCreateAutomation = () => {
-    const parsed = FormSchema.safeParse({
-      url,
-    });
-
+  const handleCreateAutomation = async () => {
+    const parsed = FormSchema.safeParse({ url });
+  
     if (!parsed.success) {
       toast.error(
-        parsed.error.issues[0]?.message ??
-          "Enter a valid URL"
+        parsed.error.issues[0]?.message ?? "Enter a valid URL",
       );
       return;
     }
-
+  
     if (!description.trim()) {
       toast.error("Describe the task you want to automate");
       return;
     }
-
-    setIsNavigating(true);
-
-    const workflowId = crypto.randomUUID();
-
-    const workflow = {
-      id: workflowId,
-      url: parsed.data.url,
-      description: description.trim(),
-      mode,
-      createdAt: new Date().toISOString(),
-      status: "Draft",
-    };
-
-    localStorage.setItem(
-      `workflow-${workflowId}`,
-      JSON.stringify(workflow)
-    );
-
-    router.push(`/dashboard/automations/${workflowId}`);
+  
+    try {
+      const automation = await createAutomation.mutateAsync({
+        url: parsed.data.url,
+        instructions: description.trim(),
+      });
+  
+      router.push(`/dashboard/automations/${automation.publicId}`);
+    } catch (error) {
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Failed to create automation.",
+      );
+    }
   };
 
-  const isPending = isNavigating;
 
   const detectedLabel =
     MODES.find((m) => m.id === mode)?.label ?? mode;
