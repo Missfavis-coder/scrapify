@@ -9,15 +9,16 @@ version = "0.1.0"
 description = "AI planning and browser-agent intelligence for Scrapify"
 requires-python = ">=3.11"
 
+
 dependencies = [
     "fastapi",
     "uvicorn[standard]",
     "pydantic",
     "pydantic-settings",
     "python-dotenv",
-    "openai",
+    "google-genai",
+    "playwright",
 ]
-
 
 [project.optional-dependencies]
 dev = [

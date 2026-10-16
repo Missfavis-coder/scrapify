@@ -26,7 +26,7 @@ const loadingSteps = [
   },
 ];
 
-export function WorkflowSkeleton() {
+export function AutomationSkeleton() {
   const [activeStep, setActiveStep] = useState(0);
 
   useEffect(() => {
