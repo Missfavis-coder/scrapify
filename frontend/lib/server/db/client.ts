@@ -1,14 +1,27 @@
-import { drizzle } from "drizzle-orm/postgres-js";
-import postgres from "postgres";
-import { getServerEnv } from "@/lib/server/env";
-import * as schema from "@/lib/server/db/schema";
+import "server-only";
 
-let cached: ReturnType<typeof drizzle> | null = null;
+import { Pool } from "pg";
+import { drizzle } from "drizzle-orm/node-postgres";
 
-export function getDb() {
-  if (cached) return cached;
-  const env = getServerEnv();
-  const client = postgres(env.DATABASE_URL, { max: 5, prepare: false });
-  cached = drizzle(client, { schema });
-  return cached;
+import * as schema from "./schema";
+
+const connectionString = process.env.DATABASE_URL;
+
+if (!connectionString) {
+  throw new Error("DATABASE_URL is not configured");
+}
+
+const pool = new Pool({
+  connectionString,
+});
+
+export const db = drizzle(pool, { schema });
+export { pool };
+
+export function getDatabasePoolStats() {
+  return {
+    total: pool.totalCount,
+    idle: pool.idleCount,
+    waiting: pool.waitingCount,
+  };
 }

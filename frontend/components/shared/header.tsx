@@ -1,7 +1,5 @@
 import Link from "next/link";
-import { MobileNavMenu } from "../shared/mobile-nav-menu";
-import { UserMenu } from "../shared/user-menu";
-import { USER_MENU } from "@/lib/constants/user-menu";
+import { MobileNavMenu } from "./mobile-nav-menu";
 import { HEADER_CENTER_NAV } from "@/lib/constants/footer";
 
 

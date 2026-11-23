@@ -20,6 +20,7 @@ export interface Generation {
   sourceUrl: string;
   sourceHost: string;
   mode: GenerationMode;
+  description: string;
   status: GenerationStatus;
   isPublic: boolean;
   viewCount: number;
@@ -103,6 +104,7 @@ export interface CrawledPagesResponse {
 
 export interface CreateGenerationDto {
   url: string;
+  description: string;
   mode: GenerationMode;
 }
 

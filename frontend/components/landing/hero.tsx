@@ -68,11 +68,6 @@ function ParticleField({ count = 28 }: { count?: number }) {
     </div>
   )
 }
-
-/* ---------------------------------------------
-   ScrambleWord — "Scrapify" scatters, then
-   reassembles into place, on a loop
---------------------------------------------- */
 function ScrambleWord({ word = 'Scrapify' }: { word?: string }) {
   const [cycle, setCycle] = useState(0)
 
@@ -84,28 +79,48 @@ function ScrambleWord({ word = 'Scrapify' }: { word?: string }) {
 
   const letters = word.split('')
 
+  const positions = [
+    { x: -25, y: 11, rotate: -20 },
+    { x: 29, y: -9, rotate: 15 },
+    { x: -13, y: 12, rotate: 38 },
+    { x: 24, y: 11, rotate: -25 },
+    { x: -16, y: -19, rotate: -10 },
+    { x: 30, y: 16, rotate: 20 },
+    { x: 23, y: 9, rotate: -8 },
+    { x: 23, y: 15, rotate: -20 },
+  ]
+
   return (
     <span className="inline-flex text-gradient" aria-label={word}>
-      {letters.map((letter, i) => (
-        <motion.span
-          key={`${cycle}-${i}`}
-          initial={{
-            opacity: 0,
-            x: (Math.random() - 0.5) * 60,
-            y: (Math.random() - 0.5) * 40,
-            rotate: (Math.random() - 0.5) * 90,
-          }}
-          animate={{ opacity: 1, x: 0, y: 0, rotate: 0 }}
-          transition={{
-            delay: i * 0.045,
-            duration: 0.5,
-            ease: [0.22, 1, 0.36, 1],
-          }}
-          className="inline-block"
-        >
-          {letter}
-        </motion.span>
-      ))}
+      {letters.map((letter, i) => {
+        const position = positions[i % positions.length]
+
+        return (
+          <motion.span
+            key={`${cycle}-${i}`}
+            initial={{
+              opacity: 0,
+              x: position.x,
+              y: position.y,
+              rotate: position.rotate,
+            }}
+            animate={{
+              opacity: 1,
+              x: 0,
+              y: 0,
+              rotate: 0,
+            }}
+            transition={{
+              delay: i * 0.045,
+              duration: 0.5,
+              ease: [0.22, 1, 0.36, 1],
+            }}
+            className="inline-block"
+          >
+            {letter}
+          </motion.span>
+        )
+      })}
     </span>
   )
 }

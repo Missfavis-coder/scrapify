@@ -1,108 +1,87 @@
+
 "use client";
 
-import { useRouter } from "nextjs-toploader/app";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
+import { useRouter } from "nextjs-toploader/app";
 import { toast } from "sonner";
 import { AnimatePresence, motion } from "framer-motion";
-import debounce from "lodash.debounce"
+import debounce from "lodash.debounce";
 import { PiArrowRight, PiGlobeBold, PiSpinnerGap } from "react-icons/pi";
 import { Button } from "../ui/button";
 import {
   ModeSelector,
   type ModeSelectorHandle,
 } from "../home/mode-selector";
-import { ApiError } from "@/lib/api";
-import { useGenerate } from "@/lib/hooks/use-generate";
 import { isValidUrl } from "@/lib/utils/url";
 import { detectModeFromUrl } from "@/lib/utils/detect-mode";
-import { SAMPLE_PICK_EVENT, type SamplePickDetail } from "@/lib/utils/sample-pick";
-import { DEFAULT_MODE, MODES } from "@/lib/constants/modes";
+import {
+  SAMPLE_PICK_EVENT,
+  type SamplePickDetail,
+} from "@/lib/utils/sample-pick";
 import {
   URL_PLACEHOLDERS,
   URL_PLACEHOLDER_INTERVAL_MS,
 } from "@/lib/constants/url-placeholders";
 import type { GenerationMode } from "@/lib/types/generation";
-
-const FormSchema = z.object({
-  url: z.string().min(4).refine(isValidUrl, "Enter a valid URL"),
-});
-
-type FormValues = z.infer<typeof FormSchema>;
+import { DEFAULT_MODE, MODES } from "@/lib/constants/modes";
 
 const DETECT_DEBOUNCE_MS = 250;
 
 export function UrlInput() {
   const router = useRouter();
 
+  const [url, setUrl] = useState("");
   const [mode, setMode] = useState<GenerationMode>(DEFAULT_MODE);
   const [detectionReason, setDetectionReason] = useState<string | null>(null);
   const [isNavigating, setIsNavigating] = useState(false);
+  const [placeholderIndex, setPlaceholderIndex] = useState(0);
 
   const overriddenRef = useRef(false);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const modeRef = useRef<ModeSelectorHandle>(null);
 
-  const { register, handleSubmit, watch, setValue } = useForm<FormValues>({
-    resolver: zodResolver(FormSchema),
-    defaultValues: { url: "" },
-  });
-
-  const urlValue = watch("url");
-
-  const [placeholderIndex, setPlaceholderIndex] = useState(0);
-
-  const isInputEmpty = urlValue.length === 0;
+  const isInputEmpty = url.length === 0;
 
   useEffect(() => {
     if (!isInputEmpty) return;
 
     const id = window.setInterval(() => {
       setPlaceholderIndex(
-        (i) => (i + 1) % URL_PLACEHOLDERS.length
+        (index) => (index + 1) % URL_PLACEHOLDERS.length
       );
     }, URL_PLACEHOLDER_INTERVAL_MS);
 
     return () => window.clearInterval(id);
   }, [isInputEmpty]);
 
-  const generate = useGenerate({
-    onSuccess: ({ id, cached }) => {
+  const handleSubmit = useCallback(
+    (event: React.FormEvent<HTMLFormElement>) => {
+      event.preventDefault();
+
+      const trimmedUrl = url.trim();
+
+      if (!trimmedUrl) {
+        toast.error("Enter a URL");
+        inputRef.current?.focus();
+        return;
+      }
+
+      if (!isValidUrl(trimmedUrl)) {
+        toast.error("Enter a valid URL");
+        inputRef.current?.focus();
+        return;
+      }
+
       setIsNavigating(true);
 
-      const params = new URLSearchParams({ mode });
-
-      if (cached) {
-        params.set("cached", "1");
-      }
-
-      router.push(`/g/${id}?${params.toString()}`);
-    },
-
-    onError: (error) => {
-      const message =
-        error instanceof ApiError
-          ? error.message
-          : "Something went wrong";
-
-      toast.error(message);
-    },
-  });
-
-  const onSubmit = handleSubmit(
-    (values) => {
-      generate.mutate({
-        url: values.url,
+      const params = new URLSearchParams({
+        url: trimmedUrl,
         mode,
       });
+
+      router.push(`/dashboard/automations?${params.toString()}`);
     },
-    (errors) => {
-      if (errors.url?.message) {
-        toast.error(errors.url.message);
-      }
-    }
+    [mode, router, url]
   );
 
   const handleManualModeChange = useCallback(
@@ -137,11 +116,13 @@ export function UrlInput() {
   );
 
   useEffect(() => {
-    debouncedDetect(urlValue);
-  }, [urlValue, debouncedDetect]);
+    debouncedDetect(url);
+  }, [url, debouncedDetect]);
 
   useEffect(() => {
-    return () => debouncedDetect.cancel();
+    return () => {
+      debouncedDetect.cancel();
+    };
   }, [debouncedDetect]);
 
   useEffect(() => {
@@ -150,10 +131,7 @@ export function UrlInput() {
 
       if (!detail) return;
 
-      setValue("url", detail.url, {
-        shouldDirty: true,
-        shouldValidate: false,
-      });
+      setUrl(detail.url);
 
       overriddenRef.current = true;
       setMode(detail.mode);
@@ -172,14 +150,12 @@ export function UrlInput() {
     return () => {
       window.removeEventListener(SAMPLE_PICK_EVENT, handler);
     };
-  }, [setValue]);
-
-  const isPending = generate.isPending || isNavigating;
+  }, []);
 
   const detectedLabel =
-    MODES.find((m) => m.id === mode)?.label ?? mode;
+    MODES.find((item) => item.id === mode)?.label ?? mode;
 
-  const hasValidUrl = isValidUrl(urlValue);
+  const hasValidUrl = isValidUrl(url);
 
   const showDetection =
     !overriddenRef.current && detectionReason !== null;
@@ -188,40 +164,40 @@ export function UrlInput() {
     hasValidUrl &&
     (detectionReason !== null || overriddenRef.current);
 
-  const { ref: registerRef, ...registerRest } = register("url");
-
   return (
-    <form onSubmit={onSubmit} className="space-y-5">
+    <form onSubmit={handleSubmit} className="space-y-5">
       <div className="animated-shine-border animated-shine-border-reverse group relative flex h-14 w-full items-center gap-2 rounded-full border border-border/60 bg-card/90 pl-4 pr-1.5">
         <PiGlobeBold className="size-5 shrink-0 text-muted-foreground transition-colors group-focus-within:text-primary" />
 
         <div className="relative flex h-full min-w-0 flex-1 items-center">
           <input
+            ref={inputRef}
             type="text"
             inputMode="url"
+            value={url}
+            onChange={(event) => {
+              setUrl(event.target.value);
+
+              if (overriddenRef.current) {
+                overriddenRef.current = false;
+                setDetectionReason(null);
+              }
+            }}
             placeholder=""
             autoComplete="off"
             autoCapitalize="none"
             autoCorrect="off"
             spellCheck={false}
-            disabled={isPending}
-            {...registerRest}
-            ref={(el) => {
-              registerRef(el);
-              inputRef.current = el;
-            }}
+            disabled={isNavigating}
             className="h-full w-full bg-transparent text-base text-foreground focus:outline-none disabled:opacity-60"
           />
 
-          {isInputEmpty && !isPending ? (
+          {isInputEmpty && !isNavigating ? (
             <div
               aria-hidden
               className="pointer-events-none absolute inset-y-0 left-0 right-0 flex items-center overflow-hidden"
             >
-              <AnimatePresence
-                mode="wait"
-                initial={false}
-              >
+              <AnimatePresence mode="wait" initial={false}>
                 <motion.span
                   key={placeholderIndex}
                   initial={{ opacity: 0, y: 10 }}
@@ -231,7 +207,7 @@ export function UrlInput() {
                     duration: 0.35,
                     ease: "easeOut",
                   }}
-                  className="block max-w-full truncate sm:text-base text-sm text-muted-foreground/70"
+                  className="block max-w-full truncate text-sm text-muted-foreground/70 sm:text-base"
                 >
                   {URL_PLACEHOLDERS[placeholderIndex]}
                 </motion.span>
@@ -242,10 +218,10 @@ export function UrlInput() {
 
         <Button
           type="submit"
-          disabled={isPending}
+          disabled={isNavigating}
           className="h-11 gap-1.5 rounded-full px-5 ring-glow sm:text-sm text-xs"
         >
-          {isPending ? (
+          {isNavigating ? (
             <>
               <PiSpinnerGap className="size-4 animate-spin" />
               Generating
@@ -262,9 +238,7 @@ export function UrlInput() {
       {showDetection ? (
         <p className="text-center text-xs text-muted-foreground">
           Auto-detected:{" "}
-          <span className="text-foreground/80">
-            {detectedLabel}
-          </span>
+          <span className="text-foreground/80">{detectedLabel}</span>
 
           <span aria-hidden> &middot; </span>
 

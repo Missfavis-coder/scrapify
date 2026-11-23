@@ -130,7 +130,7 @@ export default function UseCasesPage() {
           >
 
 
-            <h1 className="mt-5 text-4xl font-semibold leading-tight tracking-tight">
+            <h1 className="mt-5 md:text-4xl text-2xl font-semibold leading-tight tracking-tight">
               What would you automate?
             </h1>
 

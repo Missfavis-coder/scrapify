@@ -8,6 +8,7 @@ import ProblemPage from "@/components/landing/problems-to-be-solved";
 import CapabilitiesPage from "@/components/landing/what-it-can-do";
 import Image from "next/image";
 
+
 export default function Home() {
   return (
     <div className="flex flex-col flex-1 items-center justify-center text-secondary font-sans bg-white">

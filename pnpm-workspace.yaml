@@ -1,8 +1,0 @@
-packages:
-  - "backend"
-  - "frontend"
-  - "ml"
-
-allowBuilds:
-  esbuild: true
-  unrs-resolver: true

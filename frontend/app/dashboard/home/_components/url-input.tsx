@@ -9,10 +9,11 @@ import { PiGlobeBold } from "react-icons/pi";
 
 import type { ModeSelectorHandle } from "@/components/home/mode-selector";
 
-import { MODES } from "@/lib/constants/modes";
+
 import { URL_PLACEHOLDERS } from "@/lib/constants/url-placeholders";
 
 import type { GenerationMode } from "@/lib/types/generation";
+import { MODES } from "@/lib/constants/modes";
 
 interface UrlInputProps {
   value: string;
@@ -61,7 +62,7 @@ export default function UrlInput({
 
   return (
     <>
-      <div className="animated-shine-border animated-shine-border-reverse group relative flex h-14 w-full items-center gap-2 rounded-full border border-border/60 bg-transparent pl-4 pr-1.5">
+      <div className="animated-shine-border animated-shine-border-reverse group relative flex h-14 w-full items-center gap-2 rounded-full border border-neutral-200 bg-transparent pl-4 pr-1.5">
         <PiGlobeBold className="size-5 shrink-0 text-muted-foreground transition-colors group-focus-within:text-primary" />
 
         <div className="relative flex h-full min-w-0 flex-1 items-center">
@@ -110,7 +111,7 @@ export default function UrlInput({
                     duration: 0.35,
                     ease: "easeOut",
                   }}
-                  className="block max-w-full truncate text-sm text-muted-foreground/70 sm:text-base"
+                  className="block max-w-full truncate text-sm text-muted-foreground sm:text-base"
                 >
                   {
                     URL_PLACEHOLDERS[

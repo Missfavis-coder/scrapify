@@ -16,7 +16,7 @@ import {
 import { Button } from "../ui/button";
 import { NavMain } from "./nav-mains";
 import NavSettings from "./nav-footer";
-import { Briefcase, CreditCard, FolderOpen, Home, HouseIcon, Laptop, SparkleIcon, Sparkles, User, Wallet, X } from "lucide-react";
+import { Briefcase, CreditCard, FolderOpen, Gauge, Home, HouseIcon, Laptop, SparkleIcon, Sparkles, User, Wallet, X } from "lucide-react";
 
 
 const navMain = [
@@ -26,10 +26,21 @@ const navMain = [
       icon: Home,
     },
     {
-      title: "Workflow",
-      url: "/dashboard/workflow",
+      title: "Automation",
+      url: "/dashboard/automations",
       icon: Sparkles,
     },
+    {
+      title: "Monitor",
+      url: "/dashboard/monitor",
+      icon: Sparkles,
+    },
+    {
+      title: "Billing",
+      url: "/dashboard/billing-usage",
+      icon: Sparkles,
+    },
+
 
   ];
   

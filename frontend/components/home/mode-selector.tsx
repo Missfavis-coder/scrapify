@@ -8,9 +8,9 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "../ui/tooltip";
-import { MODE_GATE_COPY, MODES } from "@/lib/constants/modes";
 import type { GenerationMode } from "@/lib/types/generation";
 import { cn } from "@/lib/utils";
+import { MODE_GATE_COPY, MODES } from "@/lib/constants/modes";
 
 interface ModeSelectorProps {
   value: GenerationMode;

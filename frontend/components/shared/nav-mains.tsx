@@ -43,7 +43,7 @@ export function NavMain({
                         "py-5 transition-all duration-200 flex items-center gap-3 font-medium rounded-md mb-2 cursor-pointer  ",
                         isActive
                           ? " bg-primary text-white px-6 "
-                          : "text-neutral-700",
+                          : "text-secondary hover:bg-primary/10 hover:*:text-primary px-4",
                       )}
                     >
                       {!isCollapsed && (

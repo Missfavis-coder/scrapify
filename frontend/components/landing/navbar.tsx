@@ -120,14 +120,14 @@ return(
                   className={`w-full rounded-md px-6 py-3 text-sm transition-all text-black ${
                     active
                       ? "text-[#fef29e] font-bold "
-                      : "hover:text-neutral-600"
+                      : "hover:text-neutral-600 font-semibold"
                   }`}
                 >
                   {link.name}
                 </Link>
 );
 })}
-              <button onClick={()=>{router.push("auth/login")}} className="mt-2 px-5 py-3 rounded-full bg-primary text-white font-semibold w-full cursor-pointer text-sm">
+              <button onClick={()=>{router.push("/dashboard/home")}} className="mt-2 px-5 py-3 rounded-full bg-primary text-white font-semibold w-full cursor-pointer text-sm">
                 Get Started
               </button>
             </div>

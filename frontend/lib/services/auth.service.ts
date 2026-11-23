@@ -1,232 +1,85 @@
-import axios from "axios";
-import { getBaseUrl } from "@/lib/api/config";
-import { resetTokenRefreshQueue, setAuthTokens, clearAuthTokens, tokenStorage } from "@/lib/api/client";
-import type {
-  OAuthCallbackResponse,
-  RefreshTokenResponse,
-  LoginRequest,
-  RegisterRequest,
-  AuthResponse,
-  MeResponse,
-  User,
-} from "@/lib/types/api";
 
-interface BackendTokenResponse<T = any> {
-  success: boolean;
-  data?: T;
-  error?: string;
-  message?: string;
+import type {
+  AuthUser,
+  AuthenticationResponse,
+  CurrentUserResponse,
+  LoginPayload,
+  LogoutResponse,
+  RegisterPayload,
+} from "@/lib/types/auth";
+
+async function authRequest(
+  endpoint: string,
+  payload: LoginPayload | RegisterPayload,
+): Promise<AuthUser> {
+  const response = await fetch(endpoint, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    credentials: "same-origin",
+    body: JSON.stringify(payload),
+  });
+
+  const data = (await response.json()) as AuthenticationResponse;
+
+  if (!response.ok) {
+    throw new Error(
+      data.error || data.message || "Authentication request failed.",
+    );
+  }
+
+  if (!data.user) {
+    throw new Error("Authentication response did not include a user.");
+  }
+
+  return data.user;
 }
 
-const axiosInstance = axios.create({
-  baseURL: getBaseUrl(),
-  timeout: 30000,
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
+async function me(): Promise<AuthUser | null> {
+  const response = await fetch("/api/auth/me", {
+    method: "GET",
+    credentials: "same-origin",
+    cache: "no-store",
+  });
 
-// Add token to requests if available
-axiosInstance.interceptors.request.use((config) => {
-  const accessToken = tokenStorage.getAccessToken();
-  if (accessToken && config.headers) {
-    config.headers.Authorization = `Bearer ${accessToken}`;
+  if (!response.ok) {
+    throw new Error("Unable to retrieve the current user.");
   }
-  return config;
-});
 
-// Handle token refresh on 401 responses
-axiosInstance.interceptors.response.use(
-  (response) => response,
-  async (error) => {
-    const originalRequest = error.config;
-    
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true;
-      
-      try {
-        const refreshToken = tokenStorage.getRefreshToken();
-        if (refreshToken) {
-          const newTokens = await authService.refreshToken();
-          if (newTokens) {
-            originalRequest.headers.Authorization = `Bearer ${newTokens.accessToken}`;
-            return axiosInstance(originalRequest);
-          }
-        }
-      } catch (refreshError) {
-        // Refresh failed, clear tokens and redirect to login
-        clearAuthTokens();
-        if (typeof window !== "undefined") {
-          window.location.href = "/auth/login";
-        }
-      }
-    }
-    
-    return Promise.reject(error);
+  const data = (await response.json()) as CurrentUserResponse;
+
+  return data.user;
+}
+
+async function logout(): Promise<void> {
+  const response = await fetch("/api/auth/logout", {
+    method: "POST",
+    credentials: "same-origin",
+  });
+
+  if (!response.ok) {
+    const data = (await response.json().catch(() => ({}))) as {
+      error?: string;
+      message?: string;
+    };
+
+    throw new Error(
+      data.error || data.message || "Unable to log out.",
+    );
   }
-);
+}
 
 export const authService = {
-  clearAuth(): void {
-    clearAuthTokens();
-    resetTokenRefreshQueue();
+  register(payload: RegisterPayload) {
+    return authRequest("/api/auth/register", payload);
   },
 
-  // OAUTH CALLBACK
-  async handleCallback(
-    code: string,
-    state: string,
-    codeVerifier?: string,
-    referralCode?: string
-  ): Promise<OAuthCallbackResponse> {
-    const response = await axiosInstance.post<
-      BackendTokenResponse<OAuthCallbackResponse>
-    >("/auth/callback", {
-      code,
-      state,
-      codeVerifier,
-      referralCode,
-    });
-
-    const result = response.data;
-
-    if (!result.success || !result.data) {
-      throw new Error(
-        result.message || result.error || "Authentication failed"
-      );
-    }
-
-    // Store tokens if returned from OAuth
-    if (result.data.accessToken && result.data.refreshToken) {
-      setAuthTokens(result.data.accessToken, result.data.refreshToken);
-    }
-
-    return result.data;
+  login(payload: LoginPayload) {
+    return authRequest("/api/auth/login", payload);
   },
 
-  // LOGIN - Updated to store tokens
-  async login(payload: LoginRequest): Promise<User > {
-    const response = await axiosInstance.post<
-      BackendTokenResponse<AuthResponse>
-    >("/auth/login", payload);
+  me,
 
-    const result = response.data;
-
-    if ( !result.data) {
-      throw new Error(result.message || "Login failed");
-    }
-
-    // Store tokens from login response
-    if (result.data.accessToken && result.data.refreshToken) {
-      setAuthTokens(result.data.accessToken, result.data.refreshToken);
-    }
-
-    return result.data.user;
-  },
-
-  // REGISTER - Updated to store tokens
-  async register(payload: RegisterRequest): Promise<User> {
-    const response = await axiosInstance.post<
-      BackendTokenResponse<AuthResponse>
-    >("/auth/register", payload);
-
-    const result = response.data;
-
-    if (!result.success || !result.data) {
-      throw new Error(result.message || result.error || "Registration failed");
-    }
-
-    // Store tokens from registration response (if auto-login)
-    if (result.data.accessToken && result.data.refreshToken) {
-      setAuthTokens(result.data.accessToken, result.data.refreshToken);
-    }
-
-    return result.data.user;
-  },
-
-  async getMe(): Promise<User | null> {
-    const accessToken = tokenStorage.getAccessToken();
-    if (!accessToken) return null;
-  
-    const response = await axiosInstance.get("/auth/me");
-  
-    const result = response.data;
-  
-    if (!result?.data) return null;
-  
-    return result.data; 
-  },
-  // REFRESH TOKEN - Updated to handle token refresh
-  async refreshToken(): Promise<{ accessToken: string; refreshToken: string } | null> {
-    try {
-      const refreshToken = tokenStorage.getRefreshToken();
-      if (!refreshToken) {
-        return null;
-      }
-
-      const response = await axiosInstance.post<
-        BackendTokenResponse<RefreshTokenResponse>
-      >("/auth/refresh", {
-        refreshToken,
-      });
-
-      const result = response.data;
-
-      if (!result.success || !result.data) {
-        clearAuthTokens();
-        resetTokenRefreshQueue();
-        return null;
-      }
-
-      // Update stored tokens
-      if (result.data.accessToken) {
-        setAuthTokens(
-          result.data.accessToken,
-          result.data.refreshToken || refreshToken
-        );
-        
-        return {
-          accessToken: result.data.accessToken,
-          refreshToken: result.data.refreshToken || refreshToken,
-        };
-      }
-
-      return null;
-    } catch (error) {
-      console.error("Token refresh error:", error);
-      clearAuthTokens();
-      resetTokenRefreshQueue();
-      return null;
-    }
-  },
-
-  // LOGOUT - Updated to clear tokens
-  async logout(): Promise<void> {
-    try {
-      const refreshToken = tokenStorage.getRefreshToken();
-      if (refreshToken) {
-        await axiosInstance.post("/auth/logout", {
-          refreshToken,
-        });
-      }
-    } catch (error) {
-      console.error("Logout error:", error);
-    } finally {
-      // Always clear tokens regardless of API response
-      this.clearAuth();
-    }
-  },
-
-  // Helper method to check if user is authenticated
-  isAuthenticated(): boolean {
-    return !!tokenStorage.getAccessToken();
-  },
-
-  // Helper method to get current token (for debugging)
-  getCurrentToken(): string | null {
-    return tokenStorage.getAccessToken();
-  },
+  logout,
 };
-
-// Export token storage for external use
-export { tokenStorage };

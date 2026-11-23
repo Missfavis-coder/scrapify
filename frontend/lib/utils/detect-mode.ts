@@ -1,6 +1,6 @@
 import { normalizeUrl } from "@/lib/utils/url";
-import { DEFAULT_MODE } from "@/lib/constants/modes";
 import type { GenerationMode, ModeDetection } from "@/lib/types/generation";
+import { DEFAULT_MODE } from "../constants/modes";
 
 const LIBRARY_HOSTS = new Set<string>([
   "npmjs.com",

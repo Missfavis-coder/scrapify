@@ -1,7 +1,5 @@
 
-import { UserMenu } from "./user-menu";
 import { SiteTitle } from "../dashboard/dashboard-title";
-import { USER_MENU } from "@/lib/constants/user-menu";
 
 export async function SiteHeader() {
 

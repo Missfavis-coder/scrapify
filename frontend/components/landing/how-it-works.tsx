@@ -57,11 +57,11 @@ export default function HowItWorks() {
             viewport={{ once: true }}
             className="lg:pl-6"
           >
-            <p className="mb-4 text-sm font-medium text-[#fef29e]">
+            <p className="mb-4 text-sm font-medium text-primary">
               HOW IT WORKS
             </p>
 
-            <h2 className="text-2xl font-semibold tracking-tight  md:text-4xl text-secondary">
+            <h2 className="text-2xl font-semibold tracking-wide  md:text-4xl text-secondary">
               Turn a simple instruction into a working automation.
             </h2>
 
@@ -73,7 +73,7 @@ export default function HowItWorks() {
             </p>
 
             <Button
-              onClick={() => router.push("/auth/login")}
+              onClick={() => router.push("/login")}
               className="mt-8 cursor-pointer rounded-full bg-primary px-7 py-6 font-semibold text-white"
             >
               Get Started
