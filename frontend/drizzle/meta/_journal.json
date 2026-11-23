@@ -1,0 +1,41 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1792078547866,
+      "tag": "0000_premium_black_bolt",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1792079498218,
+      "tag": "0001_tough_marauders",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1792082023924,
+      "tag": "0002_sticky_microchip",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1792086167566,
+      "tag": "0003_volatile_the_watchers",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1792093190225,
+      "tag": "0004_white_texas_twister",
+      "breakpoints": true
+    }
+  ]
+}
